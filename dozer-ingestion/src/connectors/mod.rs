@@ -3,6 +3,8 @@ pub mod ethereum;
 pub mod grpc;
 #[cfg(feature = "kafka")]
 pub mod kafka;
+#[cfg(feature = "mongodb")]
+pub mod mongodb;
 pub mod object_store;
 pub mod postgres;
 
@@ -37,6 +39,7 @@ use self::ethereum::{EthLogConnector, EthTraceConnector};
 
 use self::grpc::connector::GrpcConnector;
 use self::grpc::{ArrowAdapter, DefaultAdapter};
+use self::mongodb::MongoConnector;
 use crate::connectors::snowflake::connector::SnowflakeConnector;
 
 #[derive(Clone, Copy, Serialize, Deserialize, Debug, Eq, PartialEq, Default)]
@@ -217,6 +220,15 @@ pub fn get_connector(connection: Connection) -> Result<Box<dyn Connector>, Conne
         ConnectionConfig::Kafka(kafka_config) => Ok(Box::new(KafkaConnector::new(5, kafka_config))),
         #[cfg(not(feature = "kafka"))]
         ConnectionConfig::Kafka(_) => Err(ConnectorError::KafkaFeatureNotEnabled),
+        #[cfg(feature = "mongodb")]
+        ConnectionConfig::Mongo(mongo_config) => {
+            Ok(Box::new(MongoConnector::new(mongodb::MongoConfig {
+                name: connection.name,
+                config: mongo_config,
+            })))
+        }
+        #[cfg(not(feature = "mongodb"))]
+        ConnectionConfig::Mongo(mongo_config) => Err(ConnectorError::MongodbFeatureNotEnabled),
         ConnectionConfig::S3Storage(object_store_config) => {
             Ok(Box::new(ObjectStoreConnector::new(5, object_store_config)))
         }
@@ -237,6 +249,7 @@ pub fn get_connector_info_table(connection: &Connection) -> Option<Table> {
         Some(ConnectionConfig::Kafka(config)) => Some(config.convert_to_table()),
         Some(ConnectionConfig::S3Storage(config)) => Some(config.convert_to_table()),
         Some(ConnectionConfig::LocalStorage(config)) => Some(config.convert_to_table()),
+        Some(ConnectionConfig::Mongo(config)) => Some(config.convert_to_table()),
         _ => None,
     }
 }

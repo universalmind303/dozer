@@ -306,6 +306,7 @@ impl SchemaHelper {
             Ok(())
         }
     }
+    
     fn convert_row(&self, row: &Row) -> Result<PostgresTableRow, PostgresSchemaError> {
         let schema: String = row.get(8);
         let table_name: String = row.get(0);

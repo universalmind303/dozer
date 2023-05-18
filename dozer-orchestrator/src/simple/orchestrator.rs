@@ -147,6 +147,7 @@ impl Orchestrator for SimpleOrchestrator {
         shutdown: ShutdownReceiver,
         api_notifier: Option<Sender<bool>>,
     ) -> Result<(), OrchestrationError> {
+        println!("Running apps");
         // gRPC notifier channel
         let (alias_redirected_sender, alias_redirected_receiver) = channel::unbounded();
         let (operation_sender, operation_receiver) = channel::unbounded();

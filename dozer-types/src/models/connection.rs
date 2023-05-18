@@ -7,10 +7,10 @@ use prettytable::Table;
 
 #[derive(Serialize, Deserialize, Eq, PartialEq, Clone, ::prost::Message, Hash)]
 pub struct Connection {
-    #[prost(oneof = "ConnectionConfig", tags = "1,2,3,4,5,6,7,8")]
+    #[prost(oneof = "ConnectionConfig", tags = "1,2,3,4,5,6,7,8,9")]
     /// authentication config - depends on db_type
     pub config: Option<ConnectionConfig>,
-    #[prost(string, tag = "9")]
+    #[prost(string, tag = "10")]
     pub name: String,
 }
 
@@ -40,6 +40,33 @@ impl PostgresConfig {
     }
 }
 
+#[derive(Serialize, Deserialize, Eq, PartialEq, Clone, ::prost::Message, Hash)]
+pub struct MongoConfig {
+    #[prost(string, tag = "1")]
+    pub user: String,
+    #[prost(string, tag = "2")]
+    pub password: String,
+    #[prost(string, tag = "3")]
+    pub host: String,
+    #[prost(uint32, tag = "4")]
+    pub port: u32,
+    #[prost(string, tag = "5")]
+    pub database: String,
+}
+
+impl MongoConfig {
+    pub fn convert_to_table(&self) -> Table {
+        table!(
+            ["user", self.user.as_str()],
+            ["password", "*************"],
+            ["host", self.host],
+            ["port", self.port],
+            ["database", self.database]
+        )
+    }
+}
+
+
 #[derive(Serialize, Deserialize, Eq, PartialEq, Clone, ::prost::Oneof, Hash)]
 pub enum ConnectionConfig {
     #[prost(message, tag = "1")]
@@ -66,4 +93,7 @@ pub enum ConnectionConfig {
     #[prost(message, tag = "8")]
     /// In yaml, present as tag" `!DeltaLake`
     DeltaLake(DeltaLakeConfig),
+    #[prost(message, tag = "9")]
+    /// In yaml, present as tag" `!Mongo`
+    Mongo(MongoConfig),
 }

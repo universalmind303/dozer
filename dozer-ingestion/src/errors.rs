@@ -94,6 +94,10 @@ pub enum ConnectorError {
 
     #[error("ethereum feature is not enabled")]
     EthereumFeatureNotEnabled,
+
+    #[error("mongodb feature is not enabled")]
+    MongodbFeatureNotEnabled,
+
 }
 impl ConnectorError {
     pub fn map_serialization_error(e: serde_json::Error) -> ConnectorError {
